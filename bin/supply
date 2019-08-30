@@ -23,7 +23,7 @@ tar xzf $CACHE_DIR/java.tar.gz -C $CACHE_DIR/
 
 chmod +x $CACHE_DIR/jdk8u222-b10-jre/bin/java
 
-$CACHE_DIR/jdk8u222-b10-jre/bin/java version
+$CACHE_DIR/jdk8u222-b10-jre/bin/java -version
 
 echo $CACHE_DIR
 
