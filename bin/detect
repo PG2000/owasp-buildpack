@@ -5,16 +5,10 @@
 # This script determines whether or not to apply the buildpack to an app
 # TODO: Write code here to exit 0 if the buildpack is compatible with the app and exit 1 otherwise
 
-set -e
+BP=$(dirname $(dirname $0))
 
-if test -f "$build/.owasp.yml"
-then
-  echo "OWASP recognized"
-  ls -lah $build
-  echo owasp
+if [ -f $1/.owasp.yml ]; then
+  echo "owasp.yml `cat $BP/VERSION`" && exit 0
 else
-  exit 1
+  echo "no" && exit 1
 fi
-
-
-exit 1
