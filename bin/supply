@@ -11,6 +11,8 @@ DEPS_IDX=$4
 
 echo $BUILD_DIR
 
+ls -lah $BUILD_DIR
+
 echo $CACHE_DIR
 
 echo $DEPS_DIR
