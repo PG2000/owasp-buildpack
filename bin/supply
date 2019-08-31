@@ -23,9 +23,9 @@ chmod +x $CACHE_DIR/jdk8u222-b10-jre/bin/java
 $CACHE_DIR/jdk8u222-b10-jre/bin/java -version
 
 URL_CHECK=https://dl.bintray.com/jeremy-long/owasp/dependency-check-5.2.1-release.zip
-curl -s -L --retry 15 --retry-delay 2 $URL -o $CACHE_DIR/depcheck.zip
+curl -s -L --retry 15 --retry-delay 2 $URL_CHECK -o $CACHE_DIR/depcheck.zip
 
-unzip $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
+unzip $CACHE_DIR/dependency-check-5.2.1-release.zip -d $CACHE_DIR/
 
 find $CACHE_DIR
 
