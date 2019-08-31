@@ -9,6 +9,11 @@ CACHE_DIR=$2
 DEPS_DIR=$3
 DEPS_IDX=$4
 
+find $BUILD_DIR
+echo "#################################################################"
+find $CACHE_DIR
+echo "#################################################################"
+
 GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
 URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
 
@@ -26,7 +31,11 @@ export JAVA_HOME=$CACHE_DIR/jdk8u222-b10-jre/
 unzip -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
 chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
-$CACHE_DIR/dependency-check/bin/dependency-check.sh --project "security-check" --failOnCVSS 11 --scan $BUILD_DIR/**/*.jar
+$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 11 --scan $BUILD_DIR/
+
+echo "##################################################"
+
+cat $CACHE_DIR/dependency-check/log
 
 echo "##################################################"
 
