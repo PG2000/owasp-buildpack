@@ -26,9 +26,8 @@ export JAVA_HOME=$CACHE_DIR/jdk8u222-b10-jre/
 unzip -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
 chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
-$CACHE_DIR/dependency-check/bin/dependency-check.sh -l log --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/**/*.jar
-echo $?
-cat log
+$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/**/*.jar
+cat $CACHE_DIR/dependency-check/log
 
 
 echo "##################################################"
