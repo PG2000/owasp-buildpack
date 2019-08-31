@@ -17,13 +17,16 @@ GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
 URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
 
 echo "-----> Download java"
-curl -s -L --retry 15 --retry-delay 2 $URL -o $CACHE_DIR/java.tar.gz
+#curl -s -L --retry 15 --retry-delay 2 $URL -o $CACHE_DIR/java.tar.gz
+#tar xzf $CACHE_DIR/java.tar.gz -C $CACHE_DIR/
+#chmod +x $CACHE_DIR/jdk8u222-b10-jre/bin/java
+#$CACHE_DIR/jdk8u222-b10-jre/bin/java -version
 
-tar xzf $CACHE_DIR/java.tar.gz -C $CACHE_DIR/
+echo "##################################################"
 
-chmod +x $CACHE_DIR/jdk8u222-b10-jre/bin/java
+env
 
-$CACHE_DIR/jdk8u222-b10-jre/bin/java -version
+echo "##################################################"
 
 echo $CACHE_DIR
 
