@@ -11,7 +11,7 @@ DEPS_IDX=$4
 
 echo $BUILD_DIR
 
-ls -lah $BUILD_DIR
+find $BUILD_DIR
 
 GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
 URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
@@ -25,9 +25,13 @@ $CACHE_DIR/jdk8u222-b10-jre/bin/java -version
 URL_CHECK=https://dl.bintray.com/jeremy-long/owasp/dependency-check-5.2.1-release.zip
 curl -s -L --retry 15 --retry-delay 2 $URL_CHECK -o $CACHE_DIR/depcheck.zip
 
+export JAVA_HOME=$CACHE_DIR/jdk8u222-b10-jre/
+
 unzip $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
-find $CACHE_DIR
+chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
+$CACHE_DIR/dependency-check/bin/dependency-check.sh -s $BUILD_DIR/**/*.jar
+
 
 echo "##################################################"
 
