@@ -11,6 +11,8 @@ DEPS_IDX=$4
 
 find $BUILD_DIR
 echo "#################################################################"
+cat $BUILD_DIR/META-INF/maven/com.example/demo/pom.xml
+
 find $CACHE_DIR
 echo "#################################################################"
 
