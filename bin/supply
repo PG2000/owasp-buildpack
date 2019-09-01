@@ -9,12 +9,7 @@ CACHE_DIR=$2
 DEPS_DIR=$3
 DEPS_IDX=$4
 
-find $BUILD_DIR
-echo "#################################################################"
-cat $BUILD_DIR/META-INF/maven/com.example/demo/pom.xml
-
-find $CACHE_DIR
-echo "#################################################################"
+echo "################## Start OWASP Scanning ###############################################"
 
 GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
 URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
@@ -30,11 +25,14 @@ curl -s -L --retry 15 --retry-delay 2 $URL_CHECK -o $CACHE_DIR/depcheck.zip
 
 export JAVA_HOME=$CACHE_DIR/jdk8u222-b10-jre/
 
-unzip -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
+unzip -q -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
 chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
-$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
+output=$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
+status=$?
+echo "################## End OWASP Scanning #################################################"
 
-echo "##################################################"
-
+echo "################## OWASP Scanning Result ##############################################"
 cat $CACHE_DIR/dependency-check/log
+echo "################## OWASP Scanning Result ##############################################"
+exit $status
