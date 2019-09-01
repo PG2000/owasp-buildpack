@@ -2,7 +2,7 @@
 # This script provides dependencies for an app
 
 
-set -euo pipefail
+set -uo pipefail
 
 BUILD_DIR=$1
 CACHE_DIR=$2
@@ -28,7 +28,7 @@ export JAVA_HOME=$CACHE_DIR/jdk8u222-b10-jre/
 unzip -q -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
 chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
-output=$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
+$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
 status=$?
 echo "################## End OWASP Scanning #################################################"
 
