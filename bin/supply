@@ -9,14 +9,13 @@ CACHE_DIR=$2
 DEPS_DIR=$3
 DEPS_IDX=$4
 
-echo "################## Start OWASP Scanning ###############################################"
-
-env
 
 if [ "$OWASP_ENABLED" == "false" ]; then
-   echo "OWASP DISABLED";
+   echo "################## OWASP DISABLED  ################################################";
    exit 0;
 fi
+
+echo "################## Start OWASP Scanning ###############################################"
 
 GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
 URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
