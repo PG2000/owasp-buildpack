@@ -39,9 +39,10 @@ $CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-che
 status=$?
 echo "################## End OWASP Scanning #################################################"
 
+find .
+
 echo "################## OWASP Scanning Result ##############################################"
 
-ls -lah
 for i in $(cat dependency-check-report.json | jq -r ".dependencies | .[] | select(.vulnerabilities != null) | .fileName")
 do
   echo "Found vulnerability for $i"
