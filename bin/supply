@@ -11,15 +11,9 @@ DEPS_IDX=$4
 
 echo "################## Start OWASP Scanning ###############################################"
 
-if ! [ -x "$(command -v jq)" ]; then
-  echo 'Error: jq is not installed.' >&2
-  exit 1
-fi
+env
 
-find $BUILD_DIR
-enabled=$(cat $BUILD_DIR/.owasp.json | jq "(.enabled|tostring)")
-
-if [ "$enabled" -eq "false" ]; then
+if [ "$OWASP_ENABLED" -eq "false" ]; then
    echo "OWASP DISABLED";
    exit 0;
 fi
