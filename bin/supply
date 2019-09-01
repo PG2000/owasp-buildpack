@@ -16,7 +16,7 @@ if ! [ -x "$(command -v jq)" ]; then
   exit 1
 fi
 
-enabled=$(cat .owasp.json | jq "(.enabled|tostring)")
+enabled=$(cat $BUILD_DIR/.owasp.json | jq "(.enabled|tostring)")
 
 if [ "$enabled" -eq "false" ]; then
    echo "OWASP DISABLED";
