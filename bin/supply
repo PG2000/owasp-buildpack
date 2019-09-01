@@ -13,7 +13,7 @@ echo "################## Start OWASP Scanning ##################################
 
 env
 
-if [ "$OWASP_ENABLED" -eq "false" ]; then
+if [ "$OWASP_ENABLED" == "false" ]; then
    echo "OWASP DISABLED";
    exit 0;
 fi
