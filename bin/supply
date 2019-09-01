@@ -35,11 +35,16 @@ unzip -q -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
 chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
 
-$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
+$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --format JSON --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
 status=$?
 echo "################## End OWASP Scanning #################################################"
 
 echo "################## OWASP Scanning Result ##############################################"
-cat $CACHE_DIR/dependency-check/log
+
+ls -lah
+for i in $(cat dependency-check-report.json | jq -r ".dependencies | .[] | select(.vulnerabilities != null) | .fileName")
+do
+  echo "Found vulnerability for $i"
+done
 echo "################## OWASP Scanning Result ##############################################"
 exit $status
