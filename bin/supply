@@ -11,6 +11,14 @@ DEPS_IDX=$4
 
 echo "################## Start OWASP Scanning ###############################################"
 
+enabled=cat $BUILD_DIR/.owasp.json | jq (.enabled|tostring)
+
+if [ "$enabled" -eq "false" ]; then
+   echo "OWASP DISABLED";
+   exit 0;
+fi
+
+
 if ! [ -x "$(command -v jq)" ]; then
   echo 'Error: jq is not installed.' >&2
   exit 1
@@ -33,6 +41,7 @@ export JAVA_HOME=$CACHE_DIR/jdk8u222-b10-jre/
 unzip -q -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
 chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
+
 $CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
 status=$?
 echo "################## End OWASP Scanning #################################################"
