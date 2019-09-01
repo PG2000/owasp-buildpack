@@ -11,17 +11,16 @@ DEPS_IDX=$4
 
 echo "################## Start OWASP Scanning ###############################################"
 
+if ! [ -x "$(command -v jq)" ]; then
+  echo 'Error: jq is not installed.' >&2
+  exit 1
+fi
+
 enabled=$(cat .owasp.json | jq (.enabled|tostring))
 
 if [ "$enabled" -eq "false" ]; then
    echo "OWASP DISABLED";
    exit 0;
-fi
-
-
-if ! [ -x "$(command -v jq)" ]; then
-  echo 'Error: jq is not installed.' >&2
-  exit 1
 fi
 
 GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
