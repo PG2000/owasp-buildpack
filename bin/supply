@@ -1,6 +1,4 @@
 #!/bin/bash
-# This script provides dependencies for an app
-
 
 set -uo pipefail
 
@@ -17,15 +15,26 @@ fi
 
 echo "-----> Start OWASP Dependency Check Scanning"
 
-GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
-URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
+JAVA_SHA_256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
+
+URL_JAVA_HOME=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
 
 echo "-----> Download java"
-curl -s -L --retry 15 --retry-delay 2 $URL -o $CACHE_DIR/java.tar.gz
+curl -s -L --retry 15 --retry-delay 2 $URL_JAVA_HOME -o $CACHE_DIR/java.tar.gz
+
+JAVA_SHA_256_DOWNLOADED=($(sha256sum $CACHE_DIR/java.tar.gz))
+
+if [ "$JAVA_SHA_256" != "$JAVA_SHA_256_DOWNLOADED" ]; then
+  echo "-----> SHA256 doesn't match"
+  echo "-----> Expected: $JAVA_SHA_256"
+  echo "-----> Actual: $JAVA_SHA_256_DOWNLOADED"
+  exit 1
+fi
+
 tar xzf $CACHE_DIR/java.tar.gz -C $CACHE_DIR/
 chmod +x $CACHE_DIR/jdk8u222-b10-jre/bin/java
-$CACHE_DIR/jdk8u222-b10-jre/bin/java -version
 
+echo "-----> Download OWASP Dependency Check Cli"
 URL_CHECK=https://dl.bintray.com/jeremy-long/owasp/dependency-check-5.2.1-release.zip
 curl -s -L --retry 15 --retry-delay 2 $URL_CHECK -o $CACHE_DIR/depcheck.zip
 
@@ -33,9 +42,11 @@ export JAVA_HOME=$CACHE_DIR/jdk8u222-b10-jre/
 
 unzip -q -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
-chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
+DEPENDENCY_CHECK_DIR=$CACHE_DIR/dependency-check
 
-$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --format JSON --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
+chmod +x $DEPENDENCY_CHECK_DIR/bin/dependency-check.sh
+
+$DEPENDENCY_CHECK_DIR/bin/dependency-check.sh -l $DEPENDENCY_CHECK_DIR/log --format JSON --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
 status=$?
 
 echo "-----> End OWASP Dependency Check Scanning"
@@ -44,7 +55,7 @@ echo "-----> Start OWASP Dependency Check Scanning Result"
 
 for i in $(cat ./dependency-check-report.json | jq -r ".dependencies | .[] | select(.vulnerabilities != null) | .fileName")
 do
-  echo ">>>> Found vulnerability for $i <<<<"
+  echo "-----> >>>> Found vulnerability for $i <<<<"
 done
 
 echo "-----> End OWASP Dependency Check Scanning Result"
