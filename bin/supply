@@ -11,11 +11,11 @@ DEPS_IDX=$4
 
 
 if [ "$OWASP_ENABLED" == "false" ]; then
-   echo "################## OWASP DISABLED  ################################################";
+   echo "-----> OWASP Dependency Check disabled";
    exit 0;
 fi
 
-echo "################## Start OWASP Scanning ###############################################"
+echo "-----> Start OWASP Dependency Check Scanning"
 
 GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
 URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
@@ -38,15 +38,15 @@ chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
 $CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --format JSON --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
 status=$?
 
-echo "################## End OWASP Scanning #################################################"
+echo "-----> End OWASP Dependency Check Scanning"
 
-echo "################## OWASP Scanning Result ##############################################"
+echo "-----> Start OWASP Dependency Check Scanning Result"
 
 for i in $(cat ./dependency-check-report.json | jq -r ".dependencies | .[] | select(.vulnerabilities != null) | .fileName")
 do
-  echo "Found vulnerability for $i"
+  echo ">>>> Found vulnerability for $i <<<<"
 done
 
-echo "################## OWASP Scanning Result ##############################################"
+echo "-----> End OWASP Dependency Check Scanning Result"
 
 exit $status
