@@ -1,59 +1,75 @@
 #!/bin/bash
-# This script provides dependencies for an app
 
-
-set -euo pipefail
+set -uo pipefail
 
 BUILD_DIR=$1
 CACHE_DIR=$2
 DEPS_DIR=$3
 DEPS_IDX=$4
 
-find $BUILD_DIR
-echo "#################################################################"
-cat $BUILD_DIR/META-INF/maven/com.example/demo/pom.xml
 
-find $CACHE_DIR
-echo "#################################################################"
+if [ "$OWASP_ENABLED" == "false" ]; then
+   echo "-----> OWASP Dependency Check disabled";
+   exit 0;
+fi
 
-GO_SHA256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
-URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
+echo "-----> Welcome to OWASP Dependency Check Scanning"
+
+JAVA_SHA_256="a418ce895c8bf3ca2e7b2f423f038b8b093941684c9430f2e40da0982e12b52d"
+
+URL_JAVA_HOME=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_x64_linux_hotspot_8u222b10.tar.gz
 
 echo "-----> Download java"
-curl -s -L --retry 15 --retry-delay 2 $URL -o $CACHE_DIR/java.tar.gz
+curl -s -L --retry 15 --retry-delay 2 $URL_JAVA_HOME -o $CACHE_DIR/java.tar.gz
+
+JAVA_SHA_256_DOWNLOADED=($(sha256sum $CACHE_DIR/java.tar.gz))
+
+if [ "$JAVA_SHA_256" != "$JAVA_SHA_256_DOWNLOADED" ]; then
+  echo "-----> SHA256 doesn't match"
+  echo "-----> Expected: $JAVA_SHA_256"
+  echo "-----> Actual: $JAVA_SHA_256_DOWNLOADED"
+  exit 1
+fi
+
 tar xzf $CACHE_DIR/java.tar.gz -C $CACHE_DIR/
 chmod +x $CACHE_DIR/jdk8u222-b10-jre/bin/java
-$CACHE_DIR/jdk8u222-b10-jre/bin/java -version
-
-URL_CHECK=https://dl.bintray.com/jeremy-long/owasp/dependency-check-5.2.1-release.zip
-curl -s -L --retry 15 --retry-delay 2 $URL_CHECK -o $CACHE_DIR/depcheck.zip
-
 export JAVA_HOME=$CACHE_DIR/jdk8u222-b10-jre/
 
-unzip -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
+echo "-----> Download OWASP Dependency Check Cli"
+URL_DEPENDENCY_CHECK_DIR=https://dl.bintray.com/jeremy-long/owasp/dependency-check-5.2.1-release.zip
+curl -s -L --retry 15 --retry-delay 2 $URL_DEPENDENCY_CHECK_DIR -o $CACHE_DIR/depcheck.zip
 
-chmod +x $CACHE_DIR/dependency-check/bin/dependency-check.sh
-$CACHE_DIR/dependency-check/bin/dependency-check.sh -l $CACHE_DIR/dependency-check/log --project "security-check" --failOnCVSS 11 --scan $BUILD_DIR/
+DEPENDENCY_CHECK_SHA_256="158283fb7d5eef869685da8fa8fd812f72b524e1efb5f3349dc93ab28e037d7e"
 
-echo "##################################################"
+DEPENDENCY_CHECK_SHA_256_DOWNLOADED=($(sha256sum $CACHE_DIR/depcheck.zip))
 
-cat $CACHE_DIR/dependency-check/log
+if [ "$DEPENDENCY_CHECK_SHA_256" != "$DEPENDENCY_CHECK_SHA_256_DOWNLOADED" ]; then
+  echo "-----> SHA256 doesn't match for dependency checker"
+  echo "-----> Expected: $DEPENDENCY_CHECK_SHA_256"
+  echo "-----> Actual: $DEPENDENCY_CHECK_SHA_256_DOWNLOADED"
+  exit 1
+fi
 
-echo "##################################################"
+unzip -q -o $CACHE_DIR/depcheck.zip -d $CACHE_DIR/
 
-env
+DEPENDENCY_CHECK_DIR=$CACHE_DIR/dependency-check
 
-echo "##################################################"
+chmod +x $DEPENDENCY_CHECK_DIR/bin/dependency-check.sh
 
-echo $CACHE_DIR
 
-echo $DEPS_DIR
+echo "-----> Start OWASP Dependency Check Scanning"
+$DEPENDENCY_CHECK_DIR/bin/dependency-check.sh -l $DEPENDENCY_CHECK_DIR/log --format JSON --project "security-check" --failOnCVSS 1 --scan $BUILD_DIR/
+status=$?
 
-echo $DEPS_IDX
+echo "-----> End OWASP Dependency Check Scanning"
 
-export BUILDPACK_DIR=`dirname $(readlink -f ${BASH_SOURCE%/*})`
-source "$BUILDPACK_DIR/scripts/install_go.sh"
-output_dir=$(mktemp -d -t supplyXXX)
-echo "-----> Running go build supply"
-GOROOT=$GoInstallDir/go GOPATH=$BUILDPACK_DIR $GoInstallDir/go/bin/go build -o $output_dir/supply owasp/supply/cli
-$output_dir/supply "$BUILD_DIR" "$CACHE_DIR" "$DEPS_DIR" "$DEPS_IDX"
+echo "-----> Start OWASP Dependency Check Scanning Result"
+
+for i in $(cat ./dependency-check-report.json | jq -r ".dependencies | .[] | select(.vulnerabilities != null) | .fileName")
+do
+  echo "-----> >>>> Found vulnerability for $i <<<<"
+done
+
+echo "-----> End OWASP Dependency Check Scanning Result"
+
+exit $status
